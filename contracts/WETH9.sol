@@ -28,7 +28,7 @@ contract WETH9 {
     mapping (address => uint)                       public  balanceOf;
     mapping (address => mapping (address => uint))  public  allowance;
 
-    function() external payable {
+    receive() external payable {
         deposit();
     }
     function deposit() public payable {
@@ -38,7 +38,8 @@ contract WETH9 {
     function withdraw(uint wad) public {
         require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
-        msg.sender.transfer(wad);
+        address payable recipient = payable(msg.sender);
+        recipient.transfer(wad);
         emit Withdrawal(msg.sender, wad);
     }
 
@@ -62,7 +63,7 @@ contract WETH9 {
     {
         require(balanceOf[src] >= wad);
 
-        if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
+        if (src != msg.sender && allowance[src][msg.sender] != type(uint256).max) {
             require(allowance[src][msg.sender] >= wad);
             allowance[src][msg.sender] -= wad;
         }
